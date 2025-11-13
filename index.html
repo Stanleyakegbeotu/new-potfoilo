@@ -404,8 +404,8 @@
         /* ==================================== */
         /* CERTIFICATION CARD SPECIFIC STYLES */
         /* ==================================== */
-        .cert-card {
-            z-index: aut10; /* Default z-index for normal flow */
+        .cert-card { 
+            z-index: auto; /* Default z-index for normal flow */
         }
         .cert-front {
             /* Overrides card-front padding and alignment for image display */
@@ -414,6 +414,8 @@
             position: relative;
             text-align: center;
         }
+        
+
 
         .cert-image {
             width: 100%;
@@ -810,7 +812,7 @@
             <a href="#hero">HOME</a>
             <a href="#about">ABOUT</a>
             <a href="#skills">SKILLS</a>
-            <a href="#certifications">CERTS</a>
+            <a href="#certifications">CERTIFICATIONS</a>
             <a href="#projects">PROJECTS</a>
             <a href="#resume-cta">RESUME</a>
             <a href="#contact">CONTACT</a>
@@ -1056,12 +1058,326 @@
     </section>
 
     <!-- Certifications Section -->
-    <section id="certifications" class=" section container">
-        <h2 class="section-heading">CERTIFICATIONS </h2>
-        <div id="certifications-grid" class="grid-3">
-            <!-- Certificate cards will be injected here by JavaScript -->
+    <!-- Certifications Section with Split-Card Animation -->
+    <section id="certifications" class="section container">
+        <h2 class="section-heading">CERTIFICATIONS</h2>
+        <div id="certifications-grid" class="grid-3"></div>
+   <!-- Certificate cards will be injected here by JavaScript -->
         </div>
     </section>
+
+    <style>
+        /* ====================================== */
+        /* CERTIFICATION SPLIT-CARD STYLES */
+        /* ====================================== */
+        
+        .cert-split-card {
+            position: relative;
+            height: 20rem; /* h-80 */
+            border-radius: 0.5rem;
+            cursor: pointer;
+            overflow: hidden;
+            background-color: var(--color-surface);
+            border: 1px solid rgba(56, 163, 165, 0.2);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .cert-split-card:hover {
+            box-shadow: 0 0 10px rgba(56, 163, 165, 0.3);
+            transform: scale(1.02);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Card Body Container */
+        .card-halves {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 3rem);
+            display: flex;
+            background-color: var(--color-surface);
+        }
+
+        .card-left,
+        .card-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(56, 163, 165, 0.1), rgba(88, 166, 255, 0.1));
+            border-right: 1px solid rgba(56, 163, 165, 0.1);
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.6s ease;
+        }
+
+        .card-right {
+            border-right: none;
+            border-left: 1px solid rgba(56, 163, 165, 0.1);
+        }
+
+        /* Placeholder Icon Wrapper (centered on top) */
+        .placeholder-icon-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            transition: opacity 0.6s ease 0.1s;
+        }
+
+        .placeholder-icon-wrapper i {
+            font-size: 2.5rem;
+            color: var(--color-link);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .placeholder-icon-wrapper p {
+            font-size: 0.85rem;
+            color: var(--color-accent);
+            font-family: 'Share Tech Mono', monospace;
+            opacity: 0.8;
+        }
+
+        /* Card Footer */
+        .card-footer-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3rem;
+            display: flex;
+            background-color: #4f46e5;
+            border-top: 1px solid rgba(56, 163, 165, 0.2);
+            overflow: hidden;
+        }
+
+        .card-footer-left,
+        .card-footer-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: 'Share Tech Mono', monospace;
+            color: #ffffff;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.6s ease;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-footer-right {
+            border-right: none;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Note Popup */
+        .note-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            z-index: 20;
+            background-color: var(--color-surface);
+            border: 2px solid var(--color-accent);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(56, 163, 165, 0.5);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .note-popup h3 {
+            color: var(--color-link);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.2rem;
+            margin: 0 0 1rem;
+            line-height: 1.4;
+        }
+
+        .note-popup p {
+            color: var(--color-text);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin: 0 0 1.5rem;
+            opacity: 0.9;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: var(--color-accent);
+            border: none;
+            color: var(--color-bg);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            background-color: var(--color-link);
+            transform: scale(1.1);
+        }
+
+        /* Open State */
+        .cert-split-card.is-open .card-left {
+            transform: translateX(-12rem);
+            opacity: 0;
+        }
+
+        .cert-split-card.is-open .card-right {
+            transform: translateX(12rem);
+            opacity: 0;
+        }
+
+        .cert-split-card.is-open .card-footer-left {
+            transform: translateX(-12rem);
+            opacity: 0;
+        }
+
+        .cert-split-card.is-open .card-footer-right {
+            transform: translateX(12rem);
+            opacity: 0;
+        }
+
+        .cert-split-card.is-open .placeholder-icon-wrapper {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .cert-split-card.is-open .note-popup {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+            transition: opacity 0.5s ease 0.2s, transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s;
+        }
+    </style>
+
+    <script>
+        // Render Certification Split Cards
+        function renderCertificationSplitCards() {
+            const grid = document.getElementById('certifications-grid');
+            if (!grid) return;
+
+            certificationsData.forEach((cert, index) => {
+                const card = document.createElement('div');
+                card.className = 'cert-split-card';
+                card.dataset.index = index;
+
+                const titlePart1 = cert.name.substring(0, Math.ceil(cert.name.length / 2));
+                const titlePart2 = cert.name.substring(Math.ceil(cert.name.length / 2));
+
+                card.innerHTML = `
+                    <!-- Card Body with Left and Right Halves -->
+                    <div class="card-halves">
+                        <div class="card-left"></div>
+                        <div class="card-right"></div>
+                        
+                        <!-- Placeholder Icon (centered on top) -->
+                        <div class="placeholder-icon-wrapper">
+                            <i class="fas fa-certificate"></i>
+                            <p>Click to view certificate</p>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer Split -->
+                    <div class="card-footer-wrapper">
+                        <div class="card-footer-left">${titlePart1}</div>
+                        <div class="card-footer-right">${titlePart2}</div>
+                    </div>
+
+                    <!-- Note Popup (hidden initially) -->
+                    <div class="note-popup">
+                        <button class="close-btn" aria-label="Close certificate details">&times;</button>
+                        <h3>${cert.name}</h3>
+                        <p><strong>Issued by:</strong> ${cert.issuer}</p>
+                        <p>${cert.details}</p>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+
+                // Add event listeners
+                setupCardInteractivity(card);
+            });
+        }
+
+        function setupCardInteractivity(card) {
+            let autoSplitTimer = null;
+            let hasBeenClicked = false;
+            let isCurrentlyOpen = false;
+
+            const closeBtn = card.querySelector('.close-btn');
+
+            // Manual Click Handler
+            card.addEventListener('click', (e) => {
+                // Prevent closing when clicking inside the note popup
+                if (card.classList.contains('is-open') && e.target.closest('.note-popup') && !e.target.classList.contains('close-btn')) {
+                    return;
+                }
+
+                hasBeenClicked = true;
+                clearTimeout(autoSplitTimer);
+                toggleCardOpen(card);
+                isCurrentlyOpen = card.classList.contains('is-open');
+            });
+
+            // Close Button Handler
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                card.classList.remove('is-open');
+                isCurrentlyOpen = false;
+                hasBeenClicked = false;
+                // Restart the Intersection Observer for auto-split
+                observer.observe(card);
+            });
+
+            // Intersection Observer for Auto-Split
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting && !hasBeenClicked && !isCurrentlyOpen) {
+                            // Card is visible, start the 5-second timer
+                            autoSplitTimer = setTimeout(() => {
+                                if (!hasBeenClicked && !isCurrentlyOpen) {
+                                    toggleCardOpen(card);
+                                    isCurrentlyOpen = true;
+                                }
+                            }, 5000);
+                        } else {
+                            // Card is out of view, clear the timer
+                            clearTimeout(autoSplitTimer);
+                        }
+                    });
+                },
+                { threshold: 0.9 }
+            );
+
+            observer.observe(card);
+        }
+
+        function toggleCardOpen(card) {
+            card.classList.toggle('is-open');
+        }
+
+        // Call this function after the page loads
+        window.addEventListener('load', () => {
+            renderCertificationSplitCards();
+        });
+    </script>
 
     <!-- Projects Section -->
     <section id="projects" class="section container">
@@ -1077,14 +1393,16 @@
                 </div>
             </div>
             <div class="project-card rounded-lg border-code">
-           
                 <img src="Screenshot (67).png" alt="AI Companion App" class="rounded-lg" style="margin-bottom: 0.5rem;">
                 <h3>Advanced potfoilo website with dripping water effect.</h3>
                 <small>Prototype + Gemini</small>
                 <div class="project-links">
                     <a href="https://stanleyakegbeotu.github.io/new-potfoilo/" target="_blank"><i class="fas fa-external-link-alt"></i> View Demo</a>
                 </div>
+            </div>
+        </div>
     </section>
+     
 
     <!-- View Resume CTA -->
     <section id="resume-cta" class="section container">
@@ -1184,17 +1502,16 @@
     <script>
         // Certificate data array - Update these values with your actual info and image URLs
         const certificationsData = [
+           
             {
-                name: "Certificate for ALX AI Starter Kit - 22nd May 2025",
-                image: "https://savanna.alxafrica.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBeUFMS0E9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--0b9c85fa90eccdb0c14b1a0abe070634b6907af1/113-alx-ai-starter-kit-certificate-stanley-akegbeotu.png",
-                issuer: "ALX Africa",
-                details: "Completed the ALX AI Starter Kit program, gaining foundational knowledge in AI concepts, tools, and applications; covered topics such as AI fundamentals, machine learning basics, and practical AI use cases. (Completed May 2025)"
+                name: "Web Development Bootcamp",
+                issuer: "Udemy",
+                details: "Completed a comprehensive web development bootcamp covering HTML, CSS, JavaScript, and more."
             },
             {
-                name: "Certificate for Professional Foundations - 30th September 2025 ",
-                image: "https://savanna.alxafrica.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBN3l3TVE9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--0e9f96b4719d2563b09bec845cab7da46edd779f/89-professional-foundations-certificate-stanley-akegbeotu.png",
-                issuer: "ALX Africa",
-                details: "In-depth training on building responsive websites using HTML5, CSS3, and modern design principles. Focus on mobile-first design, media queries, and flexible layouts. (Completed Q1 2024)"
+                name: "AI & Machine Learning Specialization",
+                issuer: "Coursera",
+                details: "Specialized in AI and machine learning techniques, including neural networks and deep learning."
             }
         ];
 
@@ -1240,8 +1557,7 @@
         function flipCard(cardElement) {
             cardElement.classList.toggle('flipped');
         }
-
-        // ----------------------------------------------------
+// ----------------------------------------------------
 // 3. Certification Card Rendering
 // ----------------------------------------------------
 function renderCertifications() {
@@ -1255,32 +1571,13 @@ function renderCertifications() {
         card.className = 'skill-card cert-card reveal-item'; 
         
         card.setAttribute('onclick', 'flipCard(this)');
+        grid.appendChild(card);
+    });
+}
 
-                card.innerHTML = `
-                    <div class="card-inner">
-                        <!-- FRONT FACE: Image and Name (Footer) -->
-                        <div class="card-front cert-front">
-                            <img src="${cert.image}" alt="${cert.name} Certificate" class="cert-image" 
-                                 onerror="this.onerror=null; this.src=https://savanna.alxafrica.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBeUFMS0E9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--0b9c85fa90eccdb0c14b1a0abe070634b6907af1/113-alx-ai-starter-kit-certificate-stanley-akegbeotu.pnghttps://placehold.co/600x450/38A3A5/0D1117?text=Image+Unavailable';">
-                            <div class="cert-footer">
-                                <span>${cert.name}</span>
-                                <small style="opacity: 0.6; margin-top: 0.1rem; font-family: Inter;">Issued by ${cert.issuer}</small>
-                            </div>
-                        </div>
-                        <!-- BACK FACE: Details -->
-                        <div class="card-back">
-                            <h4>Certificate Details</h4>
-                            <p style="font-size: 0.9rem;"><strong>Name:</strong> ${cert.name}</p>
-                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">${cert.details}</p>
-                            <p style="margin-top: auto; text-align: right; color: var(--color-accent); font-size: 0.75rem;">Flip back for visual</p>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-
+// ----------------------------------------------------
+// 4. Canvas Particle Background & Theme Switching
+// ----------------------------------------------------
         // ----------------------------------------------------
         // 4. Canvas Particle Background & Theme Switching
         // ----------------------------------------------------
@@ -1493,7 +1790,6 @@ function renderCertifications() {
         
         // Start the animation loop and render dynamic content
         window.onload = function () {
-            renderCertifications(); // RENDER CERTIFICATES FIRST
             resizeCanvas();
             setTheme(currentTheme);
             animateCanvas();
