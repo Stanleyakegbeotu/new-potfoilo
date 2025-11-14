@@ -13,7 +13,7 @@
         1. Global Variables & Base Styles (Mobile-First: All fixed widths are forbidden)
         ========================================
         */
-        :root {
+        :root {            
             /* Dark Mode Defaults */
             --color-bg: #0D1117; /* Deep Charcoal */
             --color-text: #E6EDF3; /* Light Gray */
@@ -96,16 +96,19 @@
         /* HEADER & NAVIGATION */
         header {
             position: sticky;
-            top: 0;
-            width: 100%;
+            top: 0%;
+            width: 90% ;
             height: var(--header-height-mobile);
             background-color: rgba(13, 17, 23, 0.95);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(9px);
             z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 5%;
+            transition: background-color 0.5s;
+        }
+        header.light {
             box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
         }
         .light header {
@@ -1061,324 +1064,102 @@
     <!-- Certifications Section with Split-Card Animation -->
     <section id="certifications" class="section container">
         <h2 class="section-heading">CERTIFICATIONS</h2>
-        <div id="certifications-grid" class="grid-3"></div>
-   <!-- Certificate cards will be injected here by JavaScript -->
+        <div id="certifications-grid" class="grid-3">
+            <!-- Certificate cards will be injected here by JavaScript -->
         </div>
     </section>
+<style>
+    /* 1. Define the Container */
+    .cert-split-card-container {
+        position: relative; 
+        height: 20rem; /* Fixed height for the card */
+        width: 100%;
+        cursor: pointer;
+        overflow: hidden; 
+    }
 
-    <style>
-        /* ====================================== */
-        /* CERTIFICATION SPLIT-CARD STYLES */
-        /* ====================================== */
+    /* 2. The inner container */
+    .cert-split-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* 3. Base styles for both faces (Front stays put, Back slides) */
+    .card-face {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* FRONT FACE: The base layer (Certificate Image) */
+    .card-face-front {
+        z-index: 1; /* Lowest layer */
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* BACK FACE: The sliding overlay (Details) */
+    .card-face-back {
+        z-index: 2; /* Sits on top of the front face */
+        background-color: #1f2937; /* Dark background */
+        color: white;
+        /* --- FIX 1: Use Flexbox to manage inner space (header, scrollable content, footer) --- */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Ensures content is spread vertically */
+        /* padding moved to inner wrapper for better content control */
         
-        .cert-split-card {
-            position: relative;
-            height: 20rem; /* h-80 */
-            border-radius: 0.5rem;
-            cursor: pointer;
-            overflow: hidden;
-            background-color: var(--color-surface);
-            border: 1px solid rgba(56, 163, 165, 0.2);
-            transition: box-shadow 0.3s ease;
-        }
+        /* INITIAL STATE: Hidden below the card (100% of its own height) */
+        transform: translateY(100%);
+    }
 
-        .cert-split-card:hover {
-            box-shadow: 0 0 10px rgba(56, 163, 165, 0.3);
-            transform: scale(1.02);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+    /* State change when the card is clicked/toggled (The SLIDE UP effect) */
+    .cert-split-card-container.is-slid .card-face-back {
+        /* FINAL STATE: Slides up to cover the whole card */
+        transform: translateY(0);
+    }
+    
+    /* We still need the click-to-close message toggle, but adjusted for the new opacity transition */
+    .back-footer-message {
+        transition: opacity 0.3s ease-in-out 0.2s; /* Delayed fade-in */
+        opacity: 0;
+    }
+    .cert-split-card-container.is-slid .back-footer-message {
+        opacity: 1;
+    }
 
-        /* Card Body Container */
-        .card-halves {
-            position: relative;
-            width: 100%;
-            height: calc(100% - 3rem);
-            display: flex;
-            background-color: var(--color-surface);
-        }
+    /* Ensure the image placeholder fills the available space */
+    .cert-image-placeholder img {
+        object-fit: cover;
+        object-position: center;
+    }
 
-        .card-left,
-        .card-right {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, rgba(56, 163, 165, 0.1), rgba(88, 166, 255, 0.1));
-            border-right: 1px solid rgba(56, 163, 165, 0.1);
-            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.6s ease;
-        }
+    /* Custom Scrollbar Styling (for back card content) */
+    .scrollable-content::-webkit-scrollbar {
+        width: 6px; /* Reduced width */
+    }
 
-        .card-right {
-            border-right: none;
-            border-left: 1px solid rgba(56, 163, 165, 0.1);
-        }
+    .scrollable-content::-webkit-scrollbar-track {
+        background: #374151; /* Dark track matching the card back */
+        border-radius: 3px;
+    }
 
-        /* Placeholder Icon Wrapper (centered on top) */
-        .placeholder-icon-wrapper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 10;
-            transition: opacity 0.6s ease 0.1s;
-        }
-
-        .placeholder-icon-wrapper i {
-            font-size: 2.5rem;
-            color: var(--color-link);
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .placeholder-icon-wrapper p {
-            font-size: 0.85rem;
-            color: var(--color-accent);
-            font-family: 'Share Tech Mono', monospace;
-            opacity: 0.8;
-        }
-
-        /* Card Footer */
-        .card-footer-wrapper {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3rem;
-            display: flex;
-            background-color: #4f46e5;
-            border-top: 1px solid rgba(56, 163, 165, 0.2);
-            overflow: hidden;
-        }
-
-        .card-footer-left,
-        .card-footer-right {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            font-weight: 700;
-            font-family: 'Share Tech Mono', monospace;
-            color: #ffffff;
-            text-align: center;
-            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.6s ease;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .card-footer-right {
-            border-right: none;
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Note Popup */
-        .note-popup {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.5);
-            z-index: 20;
-            background-color: var(--color-surface);
-            border: 2px solid var(--color-accent);
-            border-radius: 0.75rem;
-            padding: 2rem;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 40px rgba(56, 163, 165, 0.5);
-            text-align: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .note-popup h3 {
-            color: var(--color-link);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1.2rem;
-            margin: 0 0 1rem;
-            line-height: 1.4;
-        }
-
-        .note-popup p {
-            color: var(--color-text);
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin: 0 0 1.5rem;
-            opacity: 0.9;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            background-color: var(--color-accent);
-            border: none;
-            color: var(--color-bg);
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            line-height: 1;
-        }
-
-        .close-btn:hover {
-            background-color: var(--color-link);
-            transform: scale(1.1);
-        }
-
-        /* Open State */
-        .cert-split-card.is-open .card-left {
-            transform: translateX(-12rem);
-            opacity: 0;
-        }
-
-        .cert-split-card.is-open .card-right {
-            transform: translateX(12rem);
-            opacity: 0;
-        }
-
-        .cert-split-card.is-open .card-footer-left {
-            transform: translateX(-12rem);
-            opacity: 0;
-        }
-
-        .cert-split-card.is-open .card-footer-right {
-            transform: translateX(12rem);
-            opacity: 0;
-        }
-
-        .cert-split-card.is-open .placeholder-icon-wrapper {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .cert-split-card.is-open .note-popup {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
-            transition: opacity 0.5s ease 0.2s, transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s;
-        }
-    </style>
-
-    <script>
-        // Render Certification Split Cards
-        function renderCertificationSplitCards() {
-            const grid = document.getElementById('certifications-grid');
-            if (!grid) return;
-
-            certificationsData.forEach((cert, index) => {
-                const card = document.createElement('div');
-                card.className = 'cert-split-card';
-                card.dataset.index = index;
-
-                const titlePart1 = cert.name.substring(0, Math.ceil(cert.name.length / 2));
-                const titlePart2 = cert.name.substring(Math.ceil(cert.name.length / 2));
-
-                card.innerHTML = `
-                    <!-- Card Body with Left and Right Halves -->
-                    <div class="card-halves">
-                        <div class="card-left"></div>
-                        <div class="card-right"></div>
-                        
-                        <!-- Placeholder Icon (centered on top) -->
-                        <div class="placeholder-icon-wrapper">
-                            <i class="fas fa-certificate"></i>
-                            <p>Click to view certificate</p>
-                        </div>
-                    </div>
-
-                    <!-- Card Footer Split -->
-                    <div class="card-footer-wrapper">
-                        <div class="card-footer-left">${titlePart1}</div>
-                        <div class="card-footer-right">${titlePart2}</div>
-                    </div>
-
-                    <!-- Note Popup (hidden initially) -->
-                    <div class="note-popup">
-                        <button class="close-btn" aria-label="Close certificate details">&times;</button>
-                        <h3>${cert.name}</h3>
-                        <p><strong>Issued by:</strong> ${cert.issuer}</p>
-                        <p>${cert.details}</p>
-                    </div>
-                `;
-
-                grid.appendChild(card);
-
-                // Add event listeners
-                setupCardInteractivity(card);
-            });
-        }
-
-        function setupCardInteractivity(card) {
-            let autoSplitTimer = null;
-            let hasBeenClicked = false;
-            let isCurrentlyOpen = false;
-
-            const closeBtn = card.querySelector('.close-btn');
-
-            // Manual Click Handler
-            card.addEventListener('click', (e) => {
-                // Prevent closing when clicking inside the note popup
-                if (card.classList.contains('is-open') && e.target.closest('.note-popup') && !e.target.classList.contains('close-btn')) {
-                    return;
-                }
-
-                hasBeenClicked = true;
-                clearTimeout(autoSplitTimer);
-                toggleCardOpen(card);
-                isCurrentlyOpen = card.classList.contains('is-open');
-            });
-
-            // Close Button Handler
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                card.classList.remove('is-open');
-                isCurrentlyOpen = false;
-                hasBeenClicked = false;
-                // Restart the Intersection Observer for auto-split
-                observer.observe(card);
-            });
-
-            // Intersection Observer for Auto-Split
-            const observer = new IntersectionObserver(
-                (entries) => {
-                    entries.forEach((entry) => {
-                        if (entry.isIntersecting && !hasBeenClicked && !isCurrentlyOpen) {
-                            // Card is visible, start the 5-second timer
-                            autoSplitTimer = setTimeout(() => {
-                                if (!hasBeenClicked && !isCurrentlyOpen) {
-                                    toggleCardOpen(card);
-                                    isCurrentlyOpen = true;
-                                }
-                            }, 5000);
-                        } else {
-                            // Card is out of view, clear the timer
-                            clearTimeout(autoSplitTimer);
-                        }
-                    });
-                },
-                { threshold: 0.9 }
-            );
-
-            observer.observe(card);
-        }
-
-        function toggleCardOpen(card) {
-            card.classList.toggle('is-open');
-        }
-
-        // Call this function after the page loads
-        window.addEventListener('load', () => {
-            renderCertificationSplitCards();
-        });
-    </script>
-
+    .scrollable-content::-webkit-scrollbar-thumb {
+        background-color: #6366f1; /* Indigo color for the thumb */
+        border-radius: 3px;
+    }
+</style> 
     <!-- Projects Section -->
     <section id="projects" class="section container">
         <h2 class="section-heading">PROJECTS</h2>
@@ -1402,6 +1183,9 @@
             </div>
         </div>
     </section>
+     
+
+    
      
 
     <!-- View Resume CTA -->
@@ -1500,20 +1284,6 @@
     ========================================
     -->
     <script>
-        // Certificate data array - Update these values with your actual info and image URLs
-        const certificationsData = [
-           
-            {
-                name: "Web Development Bootcamp",
-                issuer: "Udemy",
-                details: "Completed a comprehensive web development bootcamp covering HTML, CSS, JavaScript, and more."
-            },
-            {
-                name: "AI & Machine Learning Specialization",
-                issuer: "Coursera",
-                details: "Specialized in AI and machine learning techniques, including neural networks and deep learning."
-            }
-        ];
 
         // Global DOM Elements
         const modalOverlay = document.getElementById('contact-modal-overlay');
@@ -1522,6 +1292,74 @@
         const successScreen = document.getElementById('success-screen');
         const successMessageElement = document.getElementById('success-message-text');
         const formStatus = document.getElementById('form-status');
+
+        // ----------------------------------------------------
+        // CERTIFICATIONS SCRIPT
+        // ----------------------------------------------------
+        const certificationsData = [
+            { 
+                name: "Certificate for ALX AI Starter Kit - 22nd May 2025", 
+                issuer: "ALX Africa", 
+                details: " Gained foundational knowledge in artificial intelligence concepts, tools, and applications. Covered basics of machine learning, neural networks, and AI integration into web solutions.",
+                icon: "fa-laptop-code",
+                image: "AI CL.png" // Replace with your actual image file
+            },
+            { 
+                name: "Certificate for Professional Foundations - 30th September 2025", 
+                issuer: "ALX Africa", 
+                details: " Completed foundational training in professional skills, including communication, teamwork, and problem-solving, essential for thriving in tech environments.",
+                icon: "fa-cloud",
+                image: "PRO CL.png" // Replace with your actual image file
+            },
+            { 
+                name: "Front-End Web Development Certificate - 15th October 2025", 
+                issuer: "ALX Africa", 
+                details: " Acquired skills in HTML, CSS, JavaScript, and modern frontend frameworks to build responsive and interactive web applications.",
+                icon: "fa-clipboard-list",
+                image: "ere.jpeg" // Replace with your actual image file
+            },
+        ];
+
+        function renderCertificationCards() {
+            const grid = document.getElementById('certifications-grid');
+            if (!grid) return;
+
+            certificationsData.forEach((cert, index) => {
+                const container = document.createElement('div');
+                container.className = 'cert-split-card-container';
+                container.dataset.index = index;
+
+                container.innerHTML = `
+                    <div class="cert-split-card-inner">
+                        <div class="card-face card-face-front">
+                            <div class="cert-image-placeholder" style="position: relative; height: calc(100% - 3rem); width: 100%; background-color: #f3f4f6; overflow: hidden;">
+                                <img src="${cert.image}" alt="Certificate Placeholder for ${cert.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <div style="height: 3rem; background-color: #4f46e5; display: flex; align-items: center; justify-content: center; padding: 0.5rem;">
+                                <span style="color: white; font-size: 1rem; font-weight: 800; letter-spacing: 0.05em; padding: 0.25rem 0.5rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${cert.name}">
+                                    ${cert.name}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-face card-face-back">
+                            <div style="padding: 1.5rem; height: 100%; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                                <div class="scrollable-content" style="overflow-y: auto; flex-grow: 1; width: 100%; max-width: 24rem; margin: 0 auto; text-align: center;">
+                                    <h3 style="font-size: 1.5rem; font-weight: 800; color: #a5b4fc; margin-bottom: 0.5rem;">${cert.name}</h3>
+                                    <p style="font-size: 1rem; color: #d1d5db; margin-bottom: 0.75rem; border-bottom: 1px solid #374151; padding-bottom: 0.5rem;">
+                                        <strong style="color: #818cf8;">Issued by:</strong> ${cert.issuer}
+                                    </p>
+                                    <p style="font-size: 0.875rem; color: #9ca3af; line-height: 1.6; padding: 0 0.5rem 0.5rem;">${cert.details}</p>
+                                </div>
+                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #374151; width: 100%; text-align: center; flex-shrink: 0;">
+                                    <span class="back-footer-message" style="font-size: 0.75rem; font-family: monospace; color: #6366f1;">Click again to close</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                grid.appendChild(container);
+                container.addEventListener('click', () => container.classList.toggle('is-slid'));
+            });
+        }
 
         // ----------------------------------------------------
         // 1. Mobile Navigation Toggle
@@ -1697,7 +1535,8 @@ function renderCertifications() {
 
         // Close modal if user clicks outside the content box
         modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
+
+                  if (e.target === modalOverlay) {
                 closeContactModal();
             }
         });
@@ -1793,6 +1632,7 @@ function renderCertifications() {
             resizeCanvas();
             setTheme(currentTheme);
             animateCanvas();
+            renderCertificationCards();
          // --- 7. Water Drop Animation Logic ---
 
             const waterContainer = document.getElementById('water-effect-container');
